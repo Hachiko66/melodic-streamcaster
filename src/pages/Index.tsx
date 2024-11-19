@@ -9,24 +9,27 @@ import { Twitter, Instagram } from 'lucide-react';
 const STATIONS: RadioStation[] = [
   {
     id: '1',
-    name: 'Smooth Jazz',
-    url: 'https://streaming.radio.co/s774887f7b/listen',
-    genre: 'Jazz',
-    tipAddress: '0x1234567890123456789012345678901234567890' // Example ETH address
+    name: 'Radio Dangdut Indonesia',
+    url: 'https://stream-node0.rri.co.id/streaming/14/9014/rridangdut.mp3',
+    genre: 'Dangdut',
+    tipAddress: '0x1234567890123456789012345678901234567890',
+    waveInfo: 'FM 97.1 MHz - Jakarta'
   },
   {
     id: '2',
-    name: 'Classical Radio',
-    url: 'https://live.musopen.org:8085/streamvbr0',
-    genre: 'Classical',
-    tipAddress: '0x2345678901234567890123456789012345678901' // Example ETH address
+    name: 'RRI Pro 2 Jakarta',
+    url: 'https://stream-node0.rri.co.id/streaming/2/9021/rripro2.mp3',
+    genre: 'Pop & News',
+    tipAddress: '0x2345678901234567890123456789012345678901',
+    waveInfo: 'FM 95.0 MHz - Jakarta'
   },
   {
     id: '3',
-    name: 'Electronic Beats',
-    url: 'https://streams.ilovemusic.de/iloveradio2.mp3',
-    genre: 'Electronic',
-    tipAddress: '0x3456789012345678901234567890123456789012' // Example ETH address
+    name: 'Prambors FM',
+    url: 'https://22253.live.streamtheworld.com/PRAMBORS_FM.mp3',
+    genre: 'Pop & Entertainment',
+    tipAddress: '0x3456789012345678901234567890123456789012',
+    waveInfo: 'FM 102.2 MHz - Jakarta'
   },
 ];
 
@@ -121,6 +124,13 @@ const Index = () => {
           {/* Player Content */}
           <div className="bg-[#232323] p-4 space-y-4">
             <AudioVisualizer audioElement={audioRef.current} />
+            <div className="text-[#C0C0C0] text-xs">
+              {currentStation?.waveInfo && (
+                <div className="mb-2 font-mono">
+                  Wave Info: {currentStation.waveInfo}
+                </div>
+              )}
+            </div>
             <RadioControls
               isPlaying={isPlaying}
               volume={volume}

@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Wallet } from 'lucide-react';
 import { ethers } from 'ethers';
 
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 interface WalletConnectProps {
   currentStation: {
     name: string;
