@@ -1,6 +1,6 @@
 import React from 'react';
 import { Slider } from "@/components/ui/slider";
-import { Play, Pause, Volume2 } from 'lucide-react';
+import { Play, Pause, Volume2, SkipBack, SkipForward } from 'lucide-react';
 
 interface RadioControlsProps {
   isPlaying: boolean;
@@ -11,26 +11,34 @@ interface RadioControlsProps {
 
 const RadioControls = ({ isPlaying, volume, onPlayPause, onVolumeChange }: RadioControlsProps) => {
   return (
-    <div className="flex items-center gap-6 bg-white/10 backdrop-blur-lg rounded-lg p-4">
-      <button
-        onClick={onPlayPause}
-        className="w-12 h-12 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-      >
-        {isPlaying ? (
-          <Pause className="w-6 h-6 text-white" />
-        ) : (
-          <Play className="w-6 h-6 text-white" />
-        )}
-      </button>
+    <div className="space-y-2">
+      <div className="flex items-center justify-center gap-1">
+        <button className="bg-[#C0C0C0] p-1 border-t border-l border-[#FFFFFF] border-b border-r border-[#555555]">
+          <SkipBack className="w-4 h-4" />
+        </button>
+        <button
+          onClick={onPlayPause}
+          className="bg-[#C0C0C0] p-1 border-t border-l border-[#FFFFFF] border-b border-r border-[#555555]"
+        >
+          {isPlaying ? (
+            <Pause className="w-4 h-4" />
+          ) : (
+            <Play className="w-4 h-4" />
+          )}
+        </button>
+        <button className="bg-[#C0C0C0] p-1 border-t border-l border-[#FFFFFF] border-b border-r border-[#555555]">
+          <SkipForward className="w-4 h-4" />
+        </button>
+      </div>
 
-      <div className="flex items-center gap-2 w-32">
-        <Volume2 className="w-5 h-5 text-white/80" />
+      <div className="flex items-center gap-2">
+        <Volume2 className="w-4 h-4 text-[#C0C0C0]" />
         <Slider
           value={[volume]}
           max={1}
           step={0.01}
           onValueChange={onVolumeChange}
-          className="w-24"
+          className="w-full"
         />
       </div>
     </div>

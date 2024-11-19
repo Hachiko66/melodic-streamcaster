@@ -15,21 +15,16 @@ interface StationListProps {
 
 const StationList = ({ stations, currentStation, onStationSelect }: StationListProps) => {
   return (
-    <div className="grid gap-2 w-full max-w-md">
+    <div className="bg-[#232323] text-[#C0C0C0] font-mono text-sm">
       {stations.map((station) => (
         <button
           key={station.id}
           onClick={() => onStationSelect(station)}
-          className={`
-            w-full text-left p-4 rounded-lg transition-all
-            ${currentStation?.id === station.id
-              ? 'bg-white/20 backdrop-blur-lg'
-              : 'bg-white/10 hover:bg-white/15 backdrop-blur-lg'
-            }
-          `}
+          className={`w-full text-left p-1 hover:bg-[#000080] ${
+            currentStation?.id === station.id ? 'bg-[#000080]' : ''
+          }`}
         >
-          <div className="font-medium text-white">{station.name}</div>
-          <div className="text-sm text-white/60">{station.genre}</div>
+          {station.name} - {station.genre}
         </button>
       ))}
     </div>
