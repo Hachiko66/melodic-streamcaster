@@ -3,25 +3,29 @@ import { useToast } from "@/components/ui/use-toast";
 import AudioVisualizer from '@/components/AudioVisualizer';
 import RadioControls from '@/components/RadioControls';
 import StationList, { RadioStation } from '@/components/StationList';
+import WalletConnect from '@/components/WalletConnect';
 
 const STATIONS: RadioStation[] = [
   {
     id: '1',
     name: 'Smooth Jazz',
     url: 'https://streaming.radio.co/s774887f7b/listen',
-    genre: 'Jazz'
+    genre: 'Jazz',
+    tipAddress: '0x1234567890123456789012345678901234567890' // Example ETH address
   },
   {
     id: '2',
     name: 'Classical Radio',
     url: 'https://live.musopen.org:8085/streamvbr0',
-    genre: 'Classical'
+    genre: 'Classical',
+    tipAddress: '0x2345678901234567890123456789012345678901' // Example ETH address
   },
   {
     id: '3',
     name: 'Electronic Beats',
     url: 'https://streams.ilovemusic.de/iloveradio2.mp3',
-    genre: 'Electronic'
+    genre: 'Electronic',
+    tipAddress: '0x3456789012345678901234567890123456789012' // Example ETH address
   },
 ];
 
@@ -122,6 +126,7 @@ const Index = () => {
               onPlayPause={handlePlayPause}
               onVolumeChange={handleVolumeChange}
             />
+            <WalletConnect currentStation={currentStation} />
           </div>
         </div>
 

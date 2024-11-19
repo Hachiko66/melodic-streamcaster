@@ -5,6 +5,7 @@ export interface RadioStation {
   name: string;
   url: string;
   genre: string;
+  tipAddress?: string;
 }
 
 interface StationListProps {
