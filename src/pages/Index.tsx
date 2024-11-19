@@ -96,11 +96,30 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-radio-purple to-radio-teal animate-gradient-flow bg-[length:400%_400%]">
-      <div className="container max-w-4xl mx-auto p-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#1A1F2C]">
+      <div 
+        className="container max-w-4xl mx-auto p-8 relative"
+        style={{
+          background: 'linear-gradient(135deg, rgba(49,49,56,0.9) 0%, rgba(33,33,38,0.9) 100%)',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+          backdropFilter: 'blur(4px)',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+          borderRadius: '1rem'
+        }}
+      >
+        <div 
+          className="absolute inset-0 -z-10 opacity-20"
+          style={{
+            background: 'url(https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=800) center/cover',
+            filter: 'grayscale(50%)',
+            borderRadius: '1rem'
+          }}
+        />
         <div className="space-y-8">
           <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold text-white">Live Radio</h1>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent">
+              Live Radio
+            </h1>
             {currentStation && (
               <p className="text-xl text-white/80">{currentStation.name}</p>
             )}
