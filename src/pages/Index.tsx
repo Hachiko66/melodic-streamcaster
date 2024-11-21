@@ -3,7 +3,6 @@ import { useToast } from "@/components/ui/use-toast";
 import AudioVisualizer from '@/components/AudioVisualizer';
 import RadioControls from '@/components/RadioControls';
 import StationList, { RadioStation } from '@/components/StationList';
-import WalletConnect from '@/components/WalletConnect';
 import { Twitter, Instagram } from 'lucide-react';
 
 const STATIONS: RadioStation[] = [
@@ -144,7 +143,6 @@ const Index = () => {
               onPlayPause={handlePlayPause}
               onVolumeChange={handleVolumeChange}
             />
-            <WalletConnect currentStation={currentStation} />
             
             {/* Social Media Links */}
             <div className="flex justify-center gap-4 pt-2 border-t border-[#444444]">
