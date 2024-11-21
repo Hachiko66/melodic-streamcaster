@@ -30,6 +30,13 @@ const STATIONS: RadioStation[] = [
     tipAddress: '0x3456789012345678901234567890123456789012',
     waveInfo: 'FM 102.2 MHz - Jakarta'
   },
+  {
+    id: '4',
+    name: 'Custom Radio',
+    url: 'https://uk3freenew.listen2myradio.com/live.mp3?typeportmount=s1_25742_stream_842986431',
+    genre: 'Various',
+    waveInfo: 'Online Stream'
+  }
 ];
 
 const Index = () => {
