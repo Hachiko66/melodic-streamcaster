@@ -22,19 +22,22 @@ export const useAudioPlayer = () => {
   const initializeAudio = useCallback(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
+      audioRef.current.crossOrigin = "anonymous"; // Enable CORS
+      audioRef.current.preload = "auto"; // Preload audio data
       audioRef.current.volume = volume;
-      
+
       audioRef.current.onerror = () => {
         handleError('Audio element encountered an error');
       };
 
-      // Add more event listeners for better error handling
       audioRef.current.onabort = () => console.log('Audio playback aborted');
       audioRef.current.onstalled = () => console.log('Audio playback stalled');
       audioRef.current.onsuspend = () => console.log('Audio loading suspended');
+      audioRef.current.onwaiting = () => console.log('Audio is waiting for data');
+      audioRef.current.oncanplay = () => console.log('Audio can start playing');
+      audioRef.current.oncanplaythrough = () => console.log('Audio can play through');
     }
 
-    // Ensure volume is always synced
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
@@ -60,22 +63,23 @@ export const useAudioPlayer = () => {
         setIsPlaying(false);
         console.log('Playback paused');
       } else {
-        // Create AudioContext only when needed
-        if (!audioContextRef.current) {
-          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        }
-
-        if (audioContextRef.current.state === 'suspended') {
-          await audioContextRef.current.resume();
-        }
-
-        // Reset the audio element if it's in an error state
-        if (audioRef.current.error) {
-          audioRef.current.src = currentStation.url;
-        }
-
-        console.log('Attempting to play audio');
         try {
+          // Initialize AudioContext on user interaction
+          if (!audioContextRef.current) {
+            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+          }
+
+          if (audioContextRef.current.state === 'suspended') {
+            await audioContextRef.current.resume();
+          }
+
+          // Ensure the source is set
+          if (!audioRef.current.src || audioRef.current.error) {
+            audioRef.current.src = currentStation.url;
+            audioRef.current.load();
+          }
+
+          console.log('Attempting to play audio:', currentStation.url);
           await audioRef.current.play();
           setIsPlaying(true);
           console.log('Playback started successfully');
@@ -85,6 +89,7 @@ export const useAudioPlayer = () => {
         }
       }
     } catch (error) {
+      console.error('Playback control error:', error);
       handleError('Error during playback control');
     }
   }, [isPlaying, currentStation, initializeAudio, handleError]);
@@ -97,7 +102,7 @@ export const useAudioPlayer = () => {
     }
   }, []);
 
-  const handleStationSelect = useCallback((station: RadioStation) => {
+  const handleStationSelect = useCallback(async (station: RadioStation) => {
     console.log('Selecting station:', station.name);
     
     initializeAudio();
@@ -107,7 +112,7 @@ export const useAudioPlayer = () => {
       audioRef.current.pause();
       setIsPlaying(false);
       
-      // Reset the audio element
+      // Reset and prepare the audio element
       audioRef.current.src = '';
       audioRef.current.load();
       
@@ -120,16 +125,24 @@ export const useAudioPlayer = () => {
         description: `Now playing: ${station.name}`,
       });
 
-      // Attempt to play immediately if a station is selected
-      audioRef.current.play()
-        .then(() => {
-          setIsPlaying(true);
-          console.log('Playback started after station selection');
-        })
-        .catch((error) => {
-          console.error('Failed to start playback after station selection:', error);
-          handleError('Failed to start playback');
-        });
+      try {
+        // Initialize AudioContext if needed
+        if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
+
+        // Attempt to play immediately
+        await audioRef.current.play();
+        setIsPlaying(true);
+        console.log('Playback started after station selection');
+      } catch (error) {
+        console.error('Failed to start playback after station selection:', error);
+        handleError('Failed to start playback');
+      }
     }
   }, [initializeAudio, handleError]);
 
