@@ -104,8 +104,15 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#3D3D3D]">
-      <div className="space-y-2 max-w-2xl w-full px-4">
+    <div 
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url('/lovable-uploads/e5c2ac3a-8689-48e4-94f6-ed50b3c1e4ae.png')`,
+        backgroundColor: '#3D3D3D',
+        backgroundBlendMode: 'overlay',
+      }}
+    >
+      <div className="space-y-2 max-w-2xl w-full px-4 backdrop-blur-sm">
         {/* Main Player Window */}
         <div className="bg-[#C0C0C0] border-t-2 border-l-2 border-[#FFFFFF] border-b-2 border-r-2 border-[#555555] p-1">
           {/* Title Bar */}
