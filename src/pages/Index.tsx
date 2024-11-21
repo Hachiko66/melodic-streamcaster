@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useToast } from "@/components/ui/use-toast";
+import React from 'react';
+import { Twitter, Instagram } from 'lucide-react';
 import AudioVisualizer from '@/components/AudioVisualizer';
 import RadioControls from '@/components/RadioControls';
 import StationList, { RadioStation } from '@/components/StationList';
-import { Twitter, Instagram } from 'lucide-react';
+import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 
 const STATIONS: RadioStation[] = [
   {
@@ -40,106 +40,20 @@ const STATIONS: RadioStation[] = [
 ];
 
 const Index = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.5);
-  const [currentStation, setCurrentStation] = useState<RadioStation | null>(STATIONS[0]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { toast } = useToast();
+  const {
+    isPlaying,
+    volume,
+    currentStation,
+    handlePlayPause,
+    handleVolumeChange,
+    handleStationSelect,
+    setCurrentStation
+  } = useAudioPlayer();
 
-  useEffect(() => {
-    audioRef.current = new Audio();
-    audioRef.current.volume = volume;
-    
-    // Add error event listener
-    const handleError = (e: ErrorEvent) => {
-      console.error('Audio playback error:', e);
-      setIsPlaying(false);
-      toast({
-        title: "Playback Error",
-        description: "Unable to play this station. Please try another station or check your internet connection.",
-        variant: "destructive",
-      });
-    };
-
-    if (audioRef.current) {
-      audioRef.current.addEventListener('error', handleError as EventListener);
-    }
-    
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('error', handleError as EventListener);
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
+  // Set initial station
+  React.useEffect(() => {
+    setCurrentStation(STATIONS[0]);
   }, []);
-
-  useEffect(() => {
-    if (audioRef.current && currentStation) {
-      audioRef.current.src = currentStation.url;
-      if (isPlaying) {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((error) => {
-            console.error('Error playing audio:', error);
-            setIsPlaying(false);
-            toast({
-              title: "Playback Error",
-              description: "There was an error playing this station. Please try again.",
-              variant: "destructive",
-            });
-          });
-        }
-      }
-    }
-  }, [currentStation]);
-
-  const handlePlayPause = () => {
-    if (!audioRef.current || !currentStation) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
-            console.log('Playback started successfully');
-          })
-          .catch((error) => {
-            console.error('Error playing audio:', error);
-            setIsPlaying(false);
-            toast({
-              title: "Playback Error",
-              description: "There was an error playing this station. Please try again.",
-              variant: "destructive",
-            });
-          });
-      }
-    }
-  };
-
-  const handleVolumeChange = (newValue: number[]) => {
-    const volumeValue = newValue[0];
-    setVolume(volumeValue);
-    if (audioRef.current) {
-      audioRef.current.volume = volumeValue;
-    }
-  };
-
-  const handleStationSelect = (station: RadioStation) => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-    setIsPlaying(false);
-    setCurrentStation(station);
-    toast({
-      title: "Station Changed",
-      description: `Now playing: ${station.name}`,
-    });
-  };
 
   return (
     <div 
@@ -168,7 +82,7 @@ const Index = () => {
 
           {/* Player Content */}
           <div className="bg-[#232323] p-4 space-y-4">
-            <AudioVisualizer audioElement={audioRef.current} />
+            <AudioVisualizer audioElement={null} />
             <div className="text-[#C0C0C0] text-xs">
               {currentStation?.waveInfo && (
                 <div className="mb-2 font-mono">
