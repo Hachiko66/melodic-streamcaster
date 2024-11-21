@@ -7,36 +7,53 @@ export const useAudioPlayer = () => {
   const [volume, setVolume] = useState(0.5);
   const [currentStation, setCurrentStation] = useState<RadioStation | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Initialize audio element once
   useEffect(() => {
-    const audio = new Audio();
-    audio.preload = "auto";
-    audio.volume = volume;
+    if (!audioRef.current) {
+      const audio = new Audio();
+      audio.preload = "auto";
+      audio.volume = volume;
 
-    // Debug event listeners
-    audio.onloadstart = () => console.log('Audio loading started');
-    audio.onabort = () => console.log('Audio playback aborted');
-    audio.onstalled = () => console.log('Audio playback stalled');
-    audio.onsuspend = () => console.log('Audio loading suspended');
-    audio.onwaiting = () => console.log('Audio is waiting for data');
-    audio.oncanplay = () => console.log('Audio can start playing');
-    audio.oncanplaythrough = () => console.log('Audio can play through');
-    audio.onplay = () => console.log('Audio playback started');
-    audio.onplaying = () => console.log('Audio is playing');
-    audio.onended = () => console.log('Audio playback ended');
-    audio.onerror = (e) => {
-      console.error('Audio error:', e);
-      handleError('Audio playback error');
-    };
+      // Add event listeners
+      audio.addEventListener('playing', () => {
+        console.log('Audio started playing');
+        setIsPlaying(true);
+        setIsLoading(false);
+      });
 
-    audioRef.current = audio;
+      audio.addEventListener('pause', () => {
+        console.log('Audio paused');
+        setIsPlaying(false);
+      });
+
+      audio.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        setIsPlaying(false);
+        setIsLoading(false);
+        handleError('Audio playback error');
+      });
+
+      audio.addEventListener('waiting', () => {
+        console.log('Audio is buffering...');
+        setIsLoading(true);
+      });
+
+      audio.addEventListener('canplay', () => {
+        console.log('Audio can play');
+        setIsLoading(false);
+      });
+
+      audioRef.current = audio;
+    }
 
     // Cleanup on unmount
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.src = '';
+        audioRef.current.load();
       }
     };
   }, []);
@@ -51,10 +68,12 @@ export const useAudioPlayer = () => {
   const handleError = useCallback((error: string) => {
     console.error('Audio playback error:', error);
     setIsPlaying(false);
+    setIsLoading(false);
     
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
+      audioRef.current.load();
     }
 
     toast({
@@ -79,15 +98,13 @@ export const useAudioPlayer = () => {
     try {
       if (isPlaying) {
         audioRef.current.pause();
-        setIsPlaying(false);
-        console.log('Playback paused');
       } else {
-        if (!audioRef.current.src) {
+        setIsLoading(true);
+        if (audioRef.current.src !== currentStation.url) {
           audioRef.current.src = currentStation.url;
+          audioRef.current.load();
         }
         await audioRef.current.play();
-        setIsPlaying(true);
-        console.log('Playback started');
       }
     } catch (error) {
       console.error('Playback control error:', error);
@@ -109,21 +126,22 @@ export const useAudioPlayer = () => {
       // Stop current playback
       audioRef.current.pause();
       audioRef.current.src = '';
+      audioRef.current.load();
       setIsPlaying(false);
+      setIsLoading(true);
 
       // Set new station
-      audioRef.current.src = station.url;
       setCurrentStation(station);
+      audioRef.current.src = station.url;
+      audioRef.current.load();
       
       toast({
         title: "Station Changed",
-        description: `Now playing: ${station.name}`,
+        description: `Loading: ${station.name}`,
       });
 
       // Attempt to play
       await audioRef.current.play();
-      setIsPlaying(true);
-      console.log('Playback started after station selection');
     } catch (error) {
       console.error('Failed to start playback after station selection:', error);
       handleError('Failed to start playback');
@@ -132,6 +150,7 @@ export const useAudioPlayer = () => {
 
   return {
     isPlaying,
+    isLoading,
     volume,
     currentStation,
     handlePlayPause,

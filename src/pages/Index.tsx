@@ -42,6 +42,7 @@ const STATIONS: RadioStation[] = [
 const Index = () => {
   const {
     isPlaying,
+    isLoading,
     volume,
     currentStation,
     handlePlayPause,
@@ -84,6 +85,7 @@ const Index = () => {
             </div>
             <RadioControls
               isPlaying={isPlaying}
+              isLoading={isLoading}
               volume={volume}
               onPlayPause={handlePlayPause}
               onVolumeChange={handleVolumeChange}

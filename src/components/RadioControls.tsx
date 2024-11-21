@@ -1,43 +1,44 @@
 import React from 'react';
+import { Play, Pause, Volume2 } from 'lucide-react';
 import { Slider } from "@/components/ui/slider";
-import { Play, Pause, Volume2, SkipBack, SkipForward } from 'lucide-react';
 
 interface RadioControlsProps {
   isPlaying: boolean;
+  isLoading?: boolean;
   volume: number;
   onPlayPause: () => void;
   onVolumeChange: (value: number[]) => void;
 }
 
-const RadioControls = ({ isPlaying, volume, onPlayPause, onVolumeChange }: RadioControlsProps) => {
+const RadioControls = ({
+  isPlaying,
+  isLoading = false,
+  volume,
+  onPlayPause,
+  onVolumeChange
+}: RadioControlsProps) => {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-center gap-1">
-        <button className="bg-[#C0C0C0] p-1 border-t border-l border-[#FFFFFF] border-b border-r border-[#555555]">
-          <SkipBack className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onPlayPause}
-          className="bg-[#C0C0C0] p-1 border-t border-l border-[#FFFFFF] border-b border-r border-[#555555]"
-        >
-          {isPlaying ? (
-            <Pause className="w-4 h-4" />
-          ) : (
-            <Play className="w-4 h-4" />
-          )}
-        </button>
-        <button className="bg-[#C0C0C0] p-1 border-t border-l border-[#FFFFFF] border-b border-r border-[#555555]">
-          <SkipForward className="w-4 h-4" />
-        </button>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Volume2 className="w-4 h-4 text-[#C0C0C0]" />
+    <div className="flex items-center gap-4 text-[#C0C0C0]">
+      <button
+        onClick={onPlayPause}
+        disabled={isLoading}
+        className={`p-2 hover:text-white transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        {isLoading ? (
+          <div className="animate-spin h-6 w-6 border-2 border-[#C0C0C0] border-t-transparent rounded-full" />
+        ) : isPlaying ? (
+          <Pause size={24} />
+        ) : (
+          <Play size={24} />
+        )}
+      </button>
+      <div className="flex items-center gap-2 flex-1">
+        <Volume2 size={20} />
         <Slider
           value={[volume]}
+          onValueChange={onVolumeChange}
           max={1}
           step={0.01}
-          onValueChange={onVolumeChange}
           className="w-full"
         />
       </div>
