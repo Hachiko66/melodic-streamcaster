@@ -7,7 +7,6 @@ export const useAudioPlayer = () => {
   const [volume, setVolume] = useState(0.5);
   const [currentStation, setCurrentStation] = useState<RadioStation | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
 
   const handleError = useCallback((error: string) => {
     console.error('Audio playback error:', error);
@@ -22,20 +21,21 @@ export const useAudioPlayer = () => {
   const initializeAudio = useCallback(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio();
-      audioRef.current.crossOrigin = "anonymous"; // Enable CORS
-      audioRef.current.preload = "auto"; // Preload audio data
       audioRef.current.volume = volume;
 
       audioRef.current.onerror = () => {
         handleError('Audio element encountered an error');
       };
 
+      // Add event listeners for debugging
       audioRef.current.onabort = () => console.log('Audio playback aborted');
       audioRef.current.onstalled = () => console.log('Audio playback stalled');
       audioRef.current.onsuspend = () => console.log('Audio loading suspended');
       audioRef.current.onwaiting = () => console.log('Audio is waiting for data');
       audioRef.current.oncanplay = () => console.log('Audio can start playing');
       audioRef.current.oncanplaythrough = () => console.log('Audio can play through');
+      audioRef.current.onplay = () => console.log('Audio playback started');
+      audioRef.current.onplaying = () => console.log('Audio is playing');
     }
 
     if (audioRef.current) {
@@ -64,21 +64,6 @@ export const useAudioPlayer = () => {
         console.log('Playback paused');
       } else {
         try {
-          // Initialize AudioContext on user interaction
-          if (!audioContextRef.current) {
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-          }
-
-          if (audioContextRef.current.state === 'suspended') {
-            await audioContextRef.current.resume();
-          }
-
-          // Ensure the source is set
-          if (!audioRef.current.src || audioRef.current.error) {
-            audioRef.current.src = currentStation.url;
-            audioRef.current.load();
-          }
-
           console.log('Attempting to play audio:', currentStation.url);
           await audioRef.current.play();
           setIsPlaying(true);
@@ -112,10 +97,6 @@ export const useAudioPlayer = () => {
       audioRef.current.pause();
       setIsPlaying(false);
       
-      // Reset and prepare the audio element
-      audioRef.current.src = '';
-      audioRef.current.load();
-      
       // Set new station
       audioRef.current.src = station.url;
       setCurrentStation(station);
@@ -126,15 +107,6 @@ export const useAudioPlayer = () => {
       });
 
       try {
-        // Initialize AudioContext if needed
-        if (!audioContextRef.current) {
-          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-        }
-
-        if (audioContextRef.current.state === 'suspended') {
-          await audioContextRef.current.resume();
-        }
-
         // Attempt to play immediately
         await audioRef.current.play();
         setIsPlaying(true);
