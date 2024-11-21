@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { RadioStation } from '@/components/StationList';
 
 export const useAudioPlayer = () => {
@@ -17,8 +17,13 @@ export const useAudioPlayer = () => {
       audio.volume = volume;
 
       // Add event listeners
+      audio.addEventListener('loadstart', () => {
+        console.log('Audio loading started');
+        setIsLoading(true);
+      });
+
       audio.addEventListener('playing', () => {
-        console.log('Audio started playing');
+        console.log('Audio started playing successfully');
         setIsPlaying(true);
         setIsLoading(false);
       });
@@ -32,7 +37,7 @@ export const useAudioPlayer = () => {
         console.error('Audio error:', e);
         setIsPlaying(false);
         setIsLoading(false);
-        handleError('Audio playback error');
+        handleError('Failed to play audio');
       });
 
       audio.addEventListener('waiting', () => {
@@ -62,6 +67,7 @@ export const useAudioPlayer = () => {
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
+      console.log('Volume updated:', volume);
     }
   }, [volume]);
 
@@ -76,19 +82,15 @@ export const useAudioPlayer = () => {
       audioRef.current.load();
     }
 
-    toast({
-      title: "Playback Error",
+    toast.error("Playback Error", {
       description: "Unable to play this station. Please try another station or check your internet connection.",
-      variant: "destructive",
     });
   }, []);
 
   const handlePlayPause = useCallback(async () => {
     if (!currentStation) {
-      toast({
-        title: "No Station Selected",
+      toast.error("No Station Selected", {
         description: "Please select a radio station first.",
-        variant: "destructive",
       });
       return;
     }
@@ -97,10 +99,13 @@ export const useAudioPlayer = () => {
 
     try {
       if (isPlaying) {
+        console.log('Pausing playback');
         audioRef.current.pause();
       } else {
+        console.log('Starting playback');
         setIsLoading(true);
         if (audioRef.current.src !== currentStation.url) {
+          console.log('Loading new station URL:', currentStation.url);
           audioRef.current.src = currentStation.url;
           audioRef.current.load();
         }
@@ -114,6 +119,7 @@ export const useAudioPlayer = () => {
 
   const handleVolumeChange = useCallback((newValue: number[]) => {
     const volumeValue = newValue[0];
+    console.log('Setting volume to:', volumeValue);
     setVolume(volumeValue);
   }, []);
 
@@ -132,11 +138,11 @@ export const useAudioPlayer = () => {
 
       // Set new station
       setCurrentStation(station);
+      console.log('Setting new station URL:', station.url);
       audioRef.current.src = station.url;
       audioRef.current.load();
       
-      toast({
-        title: "Station Changed",
+      toast.info("Station Changed", {
         description: `Loading: ${station.name}`,
       });
 
