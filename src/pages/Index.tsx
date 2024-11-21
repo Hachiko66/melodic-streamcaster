@@ -50,8 +50,24 @@ const Index = () => {
     audioRef.current = new Audio();
     audioRef.current.volume = volume;
     
+    // Add error event listener
+    const handleError = (e: ErrorEvent) => {
+      console.error('Audio playback error:', e);
+      setIsPlaying(false);
+      toast({
+        title: "Playback Error",
+        description: "Unable to play this station. Please try another station or check your internet connection.",
+        variant: "destructive",
+      });
+    };
+
+    if (audioRef.current) {
+      audioRef.current.addEventListener('error', handleError as EventListener);
+    }
+    
     return () => {
       if (audioRef.current) {
+        audioRef.current.removeEventListener('error', handleError as EventListener);
         audioRef.current.pause();
         audioRef.current = null;
       }
@@ -62,15 +78,18 @@ const Index = () => {
     if (audioRef.current && currentStation) {
       audioRef.current.src = currentStation.url;
       if (isPlaying) {
-        audioRef.current.play().catch((error) => {
-          console.error('Error playing audio:', error);
-          toast({
-            title: "Playback Error",
-            description: "There was an error playing this station. Please try again.",
-            variant: "destructive",
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.error('Error playing audio:', error);
+            setIsPlaying(false);
+            toast({
+              title: "Playback Error",
+              description: "There was an error playing this station. Please try again.",
+              variant: "destructive",
+            });
           });
-          setIsPlaying(false);
-        });
+        }
       }
     }
   }, [currentStation]);
@@ -80,17 +99,26 @@ const Index = () => {
 
     if (isPlaying) {
       audioRef.current.pause();
+      setIsPlaying(false);
     } else {
-      audioRef.current.play().catch((error) => {
-        console.error('Error playing audio:', error);
-        toast({
-          title: "Playback Error",
-          description: "There was an error playing this station. Please try again.",
-          variant: "destructive",
-        });
-      });
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            console.log('Playback started successfully');
+          })
+          .catch((error) => {
+            console.error('Error playing audio:', error);
+            setIsPlaying(false);
+            toast({
+              title: "Playback Error",
+              description: "There was an error playing this station. Please try again.",
+              variant: "destructive",
+            });
+          });
+      }
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleVolumeChange = (newValue: number[]) => {
@@ -102,6 +130,10 @@ const Index = () => {
   };
 
   const handleStationSelect = (station: RadioStation) => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    setIsPlaying(false);
     setCurrentStation(station);
     toast({
       title: "Station Changed",
