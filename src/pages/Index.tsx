@@ -47,13 +47,8 @@ const Index = () => {
     handlePlayPause,
     handleVolumeChange,
     handleStationSelect,
-    setCurrentStation
+    audioRef
   } = useAudioPlayer();
-
-  // Set initial station
-  React.useEffect(() => {
-    setCurrentStation(STATIONS[0]);
-  }, []);
 
   return (
     <div 
@@ -65,9 +60,7 @@ const Index = () => {
       }}
     >
       <div className="space-y-2 max-w-2xl w-full px-4 backdrop-blur-sm">
-        {/* Main Player Window */}
         <div className="bg-[#C0C0C0] border-t-2 border-l-2 border-[#FFFFFF] border-b-2 border-r-2 border-[#555555] p-1">
-          {/* Title Bar */}
           <div className="bg-[#000080] text-white px-2 py-1 flex justify-between items-center text-sm mb-1">
             <div className="flex items-center gap-1">
               <img src="/lovable-uploads/1642cd86-1530-467f-a4fa-c88e5e5ea368.png" alt="Winamp" className="w-4 h-4" />
@@ -80,9 +73,8 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Player Content */}
           <div className="bg-[#232323] p-4 space-y-4">
-            <AudioVisualizer audioElement={null} />
+            <AudioVisualizer audioElement={audioRef.current} />
             <div className="text-[#C0C0C0] text-xs">
               {currentStation?.waveInfo && (
                 <div className="mb-2 font-mono">
@@ -97,7 +89,6 @@ const Index = () => {
               onVolumeChange={handleVolumeChange}
             />
             
-            {/* Social Media Links */}
             <div className="flex justify-center gap-4 pt-2 border-t border-[#444444]">
               <a
                 href="https://twitter.com/lovableradio"
@@ -119,7 +110,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Playlist Window */}
         <div className="bg-[#C0C0C0] border-t-2 border-l-2 border-[#FFFFFF] border-b-2 border-r-2 border-[#555555] p-1">
           <div className="bg-[#000080] text-white px-2 py-1 flex justify-between items-center text-sm mb-1">
             <span>Playlist</span>

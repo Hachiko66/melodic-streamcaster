@@ -19,10 +19,32 @@ export const useAudioPlayer = () => {
     });
   }, []);
 
-  const handlePlayPause = useCallback(async () => {
-    if (!audioRef.current || !currentStation) return;
+  const initializeAudio = useCallback(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.volume = volume;
+      
+      audioRef.current.onerror = () => {
+        handleError('Audio element encountered an error');
+      };
+    }
+  }, [volume]);
 
+  const handlePlayPause = useCallback(async () => {
     try {
+      if (!currentStation) {
+        toast({
+          title: "No Station Selected",
+          description: "Please select a radio station first.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      initializeAudio();
+
+      if (!audioRef.current) return;
+
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
@@ -37,18 +59,14 @@ export const useAudioPlayer = () => {
         }
 
         console.log('Attempting to play audio');
-        const playPromise = audioRef.current.play();
-        
-        if (playPromise !== undefined) {
-          await playPromise;
-          setIsPlaying(true);
-          console.log('Playback started successfully');
-        }
+        await audioRef.current.play();
+        setIsPlaying(true);
+        console.log('Playback started successfully');
       }
     } catch (error) {
       handleError('Error during playback control');
     }
-  }, [isPlaying, currentStation]);
+  }, [isPlaying, currentStation, initializeAudio, handleError]);
 
   const handleVolumeChange = useCallback((newValue: number[]) => {
     const volumeValue = newValue[0];
@@ -59,22 +77,25 @@ export const useAudioPlayer = () => {
   }, []);
 
   const handleStationSelect = useCallback((station: RadioStation) => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-      audioRef.current.volume = volume;
+    console.log('Selecting station:', station.name);
+    
+    initializeAudio();
+    
+    if (audioRef.current) {
+      // Stop current playback
+      audioRef.current.pause();
+      setIsPlaying(false);
+      
+      // Set new station
+      audioRef.current.src = station.url;
+      setCurrentStation(station);
+      
+      toast({
+        title: "Station Changed",
+        description: `Now playing: ${station.name}`,
+      });
     }
-
-    audioRef.current.pause();
-    setIsPlaying(false);
-    setCurrentStation(station);
-    
-    audioRef.current.src = station.url;
-    
-    toast({
-      title: "Station Changed",
-      description: `Now playing: ${station.name}`,
-    });
-  }, [volume]);
+  }, [initializeAudio]);
 
   return {
     isPlaying,

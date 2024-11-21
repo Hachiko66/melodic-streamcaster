@@ -11,25 +11,27 @@ const AudioVisualizer = ({ audioElement }: AudioVisualizerProps) => {
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
-    if (!audioElement) return;
+    if (!audioElement || !canvasRef.current) return;
 
     const setupAudioContext = () => {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
+      try {
+        if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
 
-      if (analyserRef.current) {
-        return;
+        if (!analyserRef.current) {
+          const analyser = audioContextRef.current.createAnalyser();
+          analyserRef.current = analyser;
+          
+          const source = audioContextRef.current.createMediaElementSource(audioElement);
+          source.connect(analyser);
+          analyser.connect(audioContextRef.current.destination);
+          
+          analyser.fftSize = 256;
+        }
+      } catch (error) {
+        console.error('Error setting up audio context:', error);
       }
-
-      const analyser = audioContextRef.current.createAnalyser();
-      analyserRef.current = analyser;
-      
-      const source = audioContextRef.current.createMediaElementSource(audioElement);
-      source.connect(analyser);
-      analyser.connect(audioContextRef.current.destination);
-      
-      analyser.fftSize = 256;
     };
 
     const initializeVisualization = () => {
@@ -73,12 +75,8 @@ const AudioVisualizer = ({ audioElement }: AudioVisualizerProps) => {
       draw();
     };
 
-    try {
-      setupAudioContext();
-      initializeVisualization();
-    } catch (error) {
-      console.error('Error setting up audio visualization:', error);
-    }
+    setupAudioContext();
+    initializeVisualization();
 
     return () => {
       if (animationRef.current) {
